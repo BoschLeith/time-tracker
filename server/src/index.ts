@@ -11,6 +11,7 @@ const db = drizzle(process.env.DB_FILE_NAME!);
 
 // Enable CORS for all routes
 app.use(cors());
+app.use(express.json());
 
 app.get("/api", (req, res) => {
   res.json({ message: "Hello from Express!" });
