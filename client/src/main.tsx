@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router";
 
 import App from "./app.tsx";
 import Clients from "./clients.tsx";
+import CreateClient from "./create-client.tsx";
 import Layout from "./layout.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -13,6 +14,7 @@ createRoot(document.getElementById("root")!).render(
         <Route element={<Layout />}>
           <Route index path="/" element={<App />} />
           <Route path="/clients" element={<Clients />} />
+          <Route path="/clients/create" element={<CreateClient />} />
         </Route>
       </Routes>
     </BrowserRouter>

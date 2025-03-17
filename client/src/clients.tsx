@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 interface Client {
   id: number;
@@ -8,6 +9,7 @@ interface Client {
 }
 
 export default function Clients() {
+  const navigate = useNavigate();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +19,7 @@ export default function Clients() {
       try {
         const response = await fetch("http://localhost:5000/api/clients");
         if (!response.ok) {
-          throw new Error("Internal Network Error");
+          throw new Error("Failed to fetch clients");
         }
         const data = await response.json();
         setClients(data.clients);
@@ -45,7 +47,24 @@ export default function Clients() {
 
   return (
     <div>
-      <h1>Clients</h1>
+      <nav>
+        <ul>
+          <li>
+            <strong>Clients</strong>
+          </li>
+        </ul>
+        <ul>
+          <li>
+            <button
+              onClick={() => {
+                navigate("create");
+              }}
+            >
+              Create Client
+            </button>{" "}
+          </li>
+        </ul>
+      </nav>
       {clients.length === 0 ? (
         <p>No clients available.</p>
       ) : (

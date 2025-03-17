@@ -22,6 +22,28 @@ app.get("/api/clients", async (req, res) => {
   res.json({ clients });
 });
 
+app.post("/api/clients", async (req, res) => {
+  try {
+    const { name, email, rate } = req.body;
+
+    if (!name || !email) {
+      return res.status(400).json({ error: "Name and email are required." });
+    }
+
+    const newClient = await db
+      .insert(clientsTable)
+      .values({ name, email, rate })
+      .returning();
+
+    return res.status(201).json({ client: newClient });
+  } catch (error) {
+    console.error("Error adding client:", error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while adding the client." });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
