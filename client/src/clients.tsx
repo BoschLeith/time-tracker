@@ -21,8 +21,8 @@ export default function Clients() {
         if (!response.ok) {
           throw new Error("Failed to fetch clients");
         }
-        const data = await response.json();
-        setClients(data.clients);
+        const { clients } = await response.json();
+        setClients(clients);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -74,6 +74,7 @@ export default function Clients() {
               <th>Name</th>
               <th>Email</th>
               <th>Rate</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -83,6 +84,11 @@ export default function Clients() {
                 <td>{client.email}</td>
                 <td>
                   {client.rate !== null ? `${client.rate.toFixed(2)}` : "N/A"}
+                </td>
+                <td>
+                  <button onClick={() => navigate(`edit/${client.id}`)}>
+                    Edit
+                  </button>
                 </td>
               </tr>
             ))}
