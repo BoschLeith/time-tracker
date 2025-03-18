@@ -54,12 +54,12 @@ app.post("/api/clients", async (req, res) => {
       return res.status(400).json({ error: "Name and email are required." });
     }
 
-    const newClient = await db
+    const [client] = await db
       .insert(clientsTable)
       .values({ name, email, rate })
       .returning();
 
-    return res.status(201).json({ client: newClient });
+    return res.status(201).json({ client });
   } catch (error) {
     console.error("Error adding client:", error);
     return res
