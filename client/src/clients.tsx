@@ -46,55 +46,47 @@ export default function Clients() {
   }
 
   return (
-    <div>
-      <nav>
-        <ul>
-          <li>
-            <strong>Clients</strong>
-          </li>
-        </ul>
-        <ul>
-          <li>
-            <button
-              onClick={() => {
-                navigate("create");
-              }}
-            >
-              Create Client
-            </button>{" "}
-          </li>
-        </ul>
-      </nav>
-      {clients.length === 0 ? (
-        <p>No clients available.</p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Rate</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {clients.map((client) => (
-              <tr key={client.id}>
-                <td>{client.name}</td>
-                <td>{client.email}</td>
-                <td>
-                  {client.rate !== null ? `${client.rate.toFixed(2)}` : "N/A"}
-                </td>
-                <td>
-                  <button onClick={() => navigate(`edit/${client.id}`)}>
-                    Edit
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+    <div className="card card-border bg-base-100 shadow-sm">
+      <div className="card-body">
+        <div className="flex items-center gap-4">
+          <h2 className="text-2xl font-bold tracking-tight">Clients</h2>
+          <button className="btn ml-auto">Add Client</button>
+        </div>
+        {clients.length === 0 ? (
+          <p>No clients available.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Rate</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {clients.map((client) => (
+                  <tr key={client.id}>
+                    <td>{client.name}</td>
+                    <td>{client.email}</td>
+                    <td>
+                      {client.rate !== null
+                        ? `${client.rate.toFixed(2)}`
+                        : "N/A"}
+                    </td>
+                    <td>
+                      <button onClick={() => navigate(`edit/${client.id}`)}>
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
