@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
 import express from "express";
 
-import { clientsTable } from "./db/schema";
+import { clients, timeEntries } from "./db/schema";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,8 +20,8 @@ app.get("/api", (req, res) => {
 });
 
 app.get("/api/clients", async (req, res) => {
-  const clients = await db.select().from(clientsTable);
-  res.json({ clients });
+  const allClients = await db.select().from(clients);
+  res.json({ clients: allClients });
 });
 
 app.get("/api/clients/:id", async (req, res) => {
@@ -34,8 +34,8 @@ app.get("/api/clients/:id", async (req, res) => {
 
     const [client] = await db
       .select()
-      .from(clientsTable)
-      .where(eq(clientsTable.id, Number(id)));
+      .from(clients)
+      .where(eq(clients.id, Number(id)));
 
     return res.status(200).json({ client });
   } catch (error) {
@@ -55,7 +55,7 @@ app.post("/api/clients", async (req, res) => {
     }
 
     const [client] = await db
-      .insert(clientsTable)
+      .insert(clients)
       .values({ name, email, company, rate })
       .returning();
 
@@ -84,9 +84,9 @@ app.put("/api/clients/:id", async (req, res) => {
     }
 
     const [updatedClient] = await db
-      .update(clientsTable)
+      .update(clients)
       .set({ name, email, rate })
-      .where(eq(clientsTable.id, Number(id)))
+      .where(eq(clients.id, Number(id)))
       .returning();
 
     return res.status(200).json({ client: updatedClient });
@@ -107,8 +107,8 @@ app.delete("/api/clients/:id", async (req, res) => {
     }
 
     const [deletedClient] = await db
-      .delete(clientsTable)
-      .where(eq(clientsTable.id, Number(id)))
+      .delete(clients)
+      .where(eq(clients.id, Number(id)))
       .returning();
 
     return res.status(200).json({ client: deletedClient });
@@ -117,6 +117,57 @@ app.delete("/api/clients/:id", async (req, res) => {
     return res
       .status(500)
       .json({ error: "An error occurred while deleting the client." });
+  }
+});
+
+app.get("/api/time-entries", async (req, res) => {
+  const allTimeEntries = await db.select().from(timeEntries);
+  res.json({ timeEntries: allTimeEntries });
+});
+
+app.get("/api/time-entries/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    if (!id) {
+      return res.status(400).json({ error: "ID is required." });
+    }
+
+    const [timeEntry] = await db
+      .select()
+      .from(timeEntries)
+      .where(eq(timeEntries.id, Number(id)));
+
+    return res.status(200).json({ timeEntry });
+  } catch (error) {
+    console.error("Error fetching time entry:", error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while fetching the time entry." });
+  }
+});
+
+app.post("/api/time-entries", async (req, res) => {
+  try {
+    const { clientId, date, duration, description } = req.body;
+
+    if (!clientId || !date || !duration || !description) {
+      return res.status(400).json({
+        error: "Client ID, date, duration, and description are required.",
+      });
+    }
+
+    const [timeEntry] = await db
+      .insert(timeEntries)
+      .values({ clientId, date, duration, description })
+      .returning();
+
+    return res.status(201).json({ timeEntry });
+  } catch (error) {
+    console.error("Error adding time entry:", error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while adding the time entry." });
   }
 });
 
