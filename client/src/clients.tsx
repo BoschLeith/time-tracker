@@ -49,6 +49,18 @@ export default function Clients() {
     fetchClients();
   }, []);
 
+  const handleCreateClick = () => {
+    setName("");
+    setEmail("");
+    setCompany("");
+    setRate(null);
+
+    const modal = document.getElementById(
+      "create_client_modal"
+    ) as HTMLDialogElement;
+    modal?.showModal();
+  };
+
   const handleCreateClient = async (e: FormEvent) => {
     e.preventDefault();
 
@@ -161,6 +173,56 @@ export default function Clients() {
     }
   };
 
+  const handleDeleteClick = (client: Client) => {
+    setSelectedClient(client);
+    const modal = document.getElementById(
+      "delete_client_modal"
+    ) as HTMLDialogElement;
+    modal?.showModal();
+  };
+
+  const handleDeleteClient = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!selectedClient) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/clients/${selectedClient.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete client");
+      }
+
+      const { client } = await response.json();
+
+      if (client) {
+        setClients(clients.filter((c) => c.id !== client.id));
+
+        const modal = document.getElementById(
+          "delete_client_modal"
+        ) as HTMLDialogElement;
+        modal?.close();
+      } else {
+        throw new Error("Unexpected response structure");
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("An unknown error occurred");
+      }
+    }
+  };
+
   if (loading) {
     return <article aria-busy="true"></article>;
   }
@@ -177,10 +239,7 @@ export default function Clients() {
           <button
             className="btn ml-auto"
             onClick={() => {
-              const modal = document.getElementById(
-                "create_client_modal"
-              ) as HTMLDialogElement;
-              modal?.showModal();
+              handleCreateClick();
             }}
           >
             Add Client
@@ -218,7 +277,12 @@ export default function Clients() {
                       >
                         Edit
                       </button>
-                      <button className="btn">Delete</button>
+                      <button
+                        className="btn"
+                        onClick={() => handleDeleteClick(client)}
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -325,10 +389,7 @@ export default function Clients() {
         id="edit_client_modal"
         className="modal"
         onClose={() => {
-          setName("");
-          setEmail("");
-          setCompany("");
-          setRate(null);
+          setSelectedClient(null);
         }}
       >
         <div className="modal-box">
@@ -392,6 +453,7 @@ export default function Clients() {
                 type="button"
                 className="btn"
                 onClick={() => {
+                  setSelectedClient(null);
                   const modal = document.getElementById(
                     "edit_client_modal"
                   ) as HTMLDialogElement;
@@ -406,6 +468,44 @@ export default function Clients() {
                 disabled={!isFormValid}
               >
                 Save
+              </button>
+            </div>
+          </form>
+        </div>
+      </dialog>
+
+      {/* Delete Client Modal */}
+      <dialog
+        id="delete_client_modal"
+        className="modal"
+        onClose={() => {
+          setSelectedClient(null);
+        }}
+      >
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">Delete Client</h3>
+          <div className="pb-2"></div>
+          <form className="space-y-2" onSubmit={handleDeleteClient}>
+            <div>
+              Are you sure you want to delete this client? This action cannot be
+              undone.
+            </div>
+            <div className="modal-action">
+              <button
+                type="button"
+                className="btn"
+                onClick={() => {
+                  setSelectedClient(null);
+                  const modal = document.getElementById(
+                    "delete_client_modal"
+                  ) as HTMLDialogElement;
+                  modal?.close();
+                }}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-error">
+                Delete
               </button>
             </div>
           </form>

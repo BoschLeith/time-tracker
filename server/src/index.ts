@@ -73,6 +73,10 @@ app.put("/api/clients/:id", async (req, res) => {
   const { name, email, rate } = req.body;
 
   try {
+    if (!id) {
+      return res.status(400).json({ error: "ID is required." });
+    }
+
     if (!name && !email && !rate) {
       return res
         .status(400)
@@ -91,6 +95,28 @@ app.put("/api/clients/:id", async (req, res) => {
     return res
       .status(500)
       .json({ error: "An error occurred while updating the client." });
+  }
+});
+
+app.delete("/api/clients/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    if (!id) {
+      return res.status(400).json({ error: "ID is required." });
+    }
+
+    const [deletedClient] = await db
+      .delete(clientsTable)
+      .where(eq(clientsTable.id, Number(id)))
+      .returning();
+
+    return res.status(200).json({ client: deletedClient });
+  } catch (error) {
+    console.error("Error deleting client:", error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while deleting the client." });
   }
 });
 
