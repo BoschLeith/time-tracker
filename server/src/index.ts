@@ -48,7 +48,7 @@ app.get("/api/clients/:id", async (req, res) => {
 
 app.post("/api/clients", async (req, res) => {
   try {
-    const { name, email, rate } = req.body;
+    const { name, email, company, rate } = req.body;
 
     if (!name || !email) {
       return res.status(400).json({ error: "Name and email are required." });
@@ -56,7 +56,7 @@ app.post("/api/clients", async (req, res) => {
 
     const [client] = await db
       .insert(clientsTable)
-      .values({ name, email, rate })
+      .values({ name, email, company, rate })
       .returning();
 
     return res.status(201).json({ client });

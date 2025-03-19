@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 interface Client {
   id: number;
   name: string;
   email: string;
+  company: string | null;
   rate: number | null;
 }
 
@@ -11,20 +12,27 @@ export default function Clients() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [company, setCompany] = useState("");
   const [rate, setRate] = useState<number | null>(null);
 
   const isFormValid =
-    name.trim() !== "" && email.trim() !== "" && rate !== null;
+    name.trim() !== "" &&
+    company.trim() !== "" &&
+    email.trim() !== "" &&
+    rate !== null;
 
   useEffect(() => {
     const fetchClients = async () => {
       try {
         const response = await fetch("http://localhost:5000/api/clients");
+
         if (!response.ok) {
           throw new Error("Failed to fetch clients");
         }
+
         const { clients } = await response.json();
         setClients(clients);
       } catch (err) {
@@ -41,7 +49,7 @@ export default function Clients() {
     fetchClients();
   }, []);
 
-  const handleCreateClient = async (e: React.FormEvent) => {
+  const handleCreateClient = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!name || !email || rate === null) {
@@ -58,6 +66,7 @@ export default function Clients() {
         body: JSON.stringify({
           name,
           email,
+          company,
           rate,
         }),
       });
@@ -78,13 +87,74 @@ export default function Clients() {
 
         setName("");
         setEmail("");
+        setCompany("");
         setRate(null);
       } else {
         throw new Error("Unexpected response structure");
       }
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("An unknown error occurred");
+      }
+    }
+  };
+
+  const handleEditClick = (client: Client) => {
+    setSelectedClient(client);
+    setName(client.name);
+    setEmail(client.email);
+    setCompany(client.company ?? "");
+    setRate(client.rate ?? null);
+    const modal = document.getElementById(
+      "edit_client_modal"
+    ) as HTMLDialogElement;
+    modal?.showModal();
+  };
+
+  const handleEditClient = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!selectedClient) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/clients/${selectedClient.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            company,
+            rate,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to edit client");
+      }
+
+      const { client } = await response.json();
+
+      if (client) {
+        setClients(clients.map((c) => (c.id === client.id ? client : c)));
+
+        const modal = document.getElementById(
+          "edit_client_modal"
+        ) as HTMLDialogElement;
+        modal?.close();
+      } else {
+        throw new Error("Unexpected response structure");
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
       } else {
         setError("An unknown error occurred");
       }
@@ -124,6 +194,7 @@ export default function Clients() {
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>Company</th>
                   <th>Email</th>
                   <th>Rate</th>
                   <th className="text-right">Actions</th>
@@ -133,6 +204,7 @@ export default function Clients() {
                 {clients.map((client) => (
                   <tr key={client.id}>
                     <td>{client.name}</td>
+                    <td>{client.company}</td>
                     <td>{client.email}</td>
                     <td>
                       {client.rate !== null
@@ -140,7 +212,12 @@ export default function Clients() {
                         : "N/A"}
                     </td>
                     <td className="text-right">
-                      <button className="btn">Edit</button>
+                      <button
+                        className="btn"
+                        onClick={() => handleEditClick(client)}
+                      >
+                        Edit
+                      </button>
                       <button className="btn">Delete</button>
                     </td>
                   </tr>
@@ -158,6 +235,7 @@ export default function Clients() {
         onClose={() => {
           setName("");
           setEmail("");
+          setCompany("");
           setRate(null);
         }}
       >
@@ -172,10 +250,23 @@ export default function Clients() {
               <input
                 type="text"
                 id="name"
-                placeholder="Leeroy Jenkins"
+                placeholder="Bruce Wayne"
                 className="w-full input"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="company">
+                <span className="text-base label-text">Company</span>
+              </label>
+              <input
+                type="text"
+                id="company"
+                placeholder="Wayne Enterprises"
+                className="w-full input"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
               />
             </div>
             <div>
@@ -223,6 +314,98 @@ export default function Clients() {
                 disabled={!isFormValid}
               >
                 Add Client
+              </button>
+            </div>
+          </form>
+        </div>
+      </dialog>
+
+      {/* Edit Client Modal */}
+      <dialog
+        id="edit_client_modal"
+        className="modal"
+        onClose={() => {
+          setName("");
+          setEmail("");
+          setCompany("");
+          setRate(null);
+        }}
+      >
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">Edit Client</h3>
+          <div className="pb-2">Edit the client</div>
+          <form className="space-y-2" onSubmit={handleEditClient}>
+            <div>
+              <label className="label" htmlFor="name">
+                <span className="text-base label-text">Name</span>
+              </label>
+              <input
+                type="text"
+                id="name"
+                placeholder="Bruce Wayne"
+                className="w-full input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="company">
+                <span className="text-base label-text">Company</span>
+              </label>
+              <input
+                type="text"
+                id="company"
+                placeholder="Wayne Enterprises"
+                className="w-full input"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="email">
+                <span className="text-base label-text">Email</span>
+              </label>
+              <input
+                type="email"
+                id="email"
+                placeholder="mail@site.com"
+                className="w-full input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="label" htmlFor="rate">
+                <span className="text-base label-text">Rate</span>
+              </label>
+              <input
+                type="number"
+                id="rate"
+                placeholder="00.00"
+                className="w-full input"
+                value={rate ?? ""}
+                onChange={(e) => setRate(Number(e.target.value))}
+              />
+            </div>
+            <div className="modal-action">
+              <button
+                type="button"
+                className="btn"
+                onClick={() => {
+                  const modal = document.getElementById(
+                    "edit_client_modal"
+                  ) as HTMLDialogElement;
+                  modal?.close();
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={!isFormValid}
+              >
+                Save
               </button>
             </div>
           </form>
