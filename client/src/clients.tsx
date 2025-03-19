@@ -224,7 +224,11 @@ export default function Clients() {
   };
 
   if (loading) {
-    return <article aria-busy="true"></article>;
+    return (
+      <div className="flex justify-center">
+        <span className="loading loading-spinner loading-xl"></span>
+      </div>
+    );
   }
 
   if (error) {
