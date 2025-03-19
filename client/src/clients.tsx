@@ -1,3 +1,4 @@
+import { Pencil, SquarePlus, Trash } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 
 interface Client {
@@ -246,6 +247,7 @@ export default function Clients() {
               handleCreateClick();
             }}
           >
+            <SquarePlus />
             Add Client
           </button>
         </div>
@@ -274,18 +276,18 @@ export default function Clients() {
                         ? `${client.rate.toFixed(2)}`
                         : "N/A"}
                     </td>
-                    <td className="text-right">
+                    <td className="text-right space-x-2">
                       <button
-                        className="btn"
+                        className="btn btn-square"
                         onClick={() => handleEditClick(client)}
                       >
-                        Edit
+                        <Pencil />
                       </button>
                       <button
-                        className="btn"
+                        className="btn btn-square"
                         onClick={() => handleDeleteClick(client)}
                       >
-                        Delete
+                        <Trash />
                       </button>
                     </td>
                   </tr>
