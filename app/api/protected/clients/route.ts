@@ -1,5 +1,6 @@
 import { db } from "@/drizzle/db";
 import { clients } from "@/drizzle/schema";
+import { getCurrentUserId } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -17,7 +18,8 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { userId, name, email, hourlyRate } = await req.json();
+    const { name, email, hourlyRate } = await req.json();
+    const userId = await getCurrentUserId();
 
     const [newClient] = await db
       .insert(clients)
