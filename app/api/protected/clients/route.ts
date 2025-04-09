@@ -1,5 +1,5 @@
-import { db } from "@/drizzle/db";
-import { clients } from "@/drizzle/schema";
+import { db } from "@/db";
+import { clients } from "@/db/schema";
 import { getCurrentUserId } from "@/lib/auth";
 import { NextResponse } from "next/server";
 

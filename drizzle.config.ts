@@ -3,7 +3,7 @@ import "@/env.config";
 
 export default defineConfig({
   out: "./drizzle",
-  schema: "./drizzle/schema.ts",
+  schema: "./db/schema.ts",
   dialect: "turso",
   dbCredentials: {
     url: process.env.TURSO_DATABASE_URL!,

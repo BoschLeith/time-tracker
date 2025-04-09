@@ -1,5 +1,5 @@
-import { db } from "@/drizzle/db";
-import { timeEntries } from "@/drizzle/schema";
+import { db } from "@/db";
+import { timeEntries } from "@/db/schema";
 import { NextResponse } from "next/server";
 
 export async function GET() {
