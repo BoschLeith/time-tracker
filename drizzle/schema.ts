@@ -48,9 +48,10 @@ export const timeEntries = sqliteTable("time_entries", {
     onDelete: "set null",
   }),
   description: text("description"),
+  date: text("date").notNull(),
   startTime: integer("start_time").notNull(),
   endTime: integer("end_time"),
-  duration: integer("duration"), // In minutes
+  duration: integer("duration"),
   createdAt: text("created_at").default(new Date().toISOString()),
 });
 
