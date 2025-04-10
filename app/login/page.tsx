@@ -1,5 +1,14 @@
 "use client";
 
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  Paper,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -31,34 +40,56 @@ const LoginPage = () => {
   };
 
   return (
-    <div>
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
+    <Container maxWidth="sm">
+      <Paper elevation={3} sx={{ padding: 4, mt: 8 }}>
+        <Typography variant="h4" align="center" gutterBottom>
+          Login
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} noValidate>
+          <TextField
+            fullWidth
+            margin="normal"
             id="email"
-            value={email}
+            label="Email"
+            type="email"
             autoComplete="email"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            slotProps={{
+              inputLabel: { required: false },
+            }}
           />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
+          <TextField
+            fullWidth
+            margin="normal"
             id="password"
+            label="Password"
+            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            slotProps={{
+              inputLabel: { required: false },
+            }}
           />
-        </div>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit">Login</button>
-      </form>
-    </div>
+          {error && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {error}
+            </Alert>
+          )}
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mt: 3 }}
+          >
+            Login
+          </Button>
+        </Box>
+      </Paper>
+    </Container>
   );
 };
 
